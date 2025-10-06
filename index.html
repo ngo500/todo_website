@@ -18,7 +18,7 @@
           <i class="fas fa-check-square"></i>
           My To-Do List
         </h1>
-        <p id="date">Today's Date is:</p>
+        <p id="date"></p>
       </header>
 
       <div class="todo-input">
@@ -29,30 +29,22 @@
       </div>
 
       <div class="filters">
-        <span class="filter active" data-filter="all">
-          All
-        </span>
-        <span class="filter" data-filter="active">
-          Active
-        </span>
-        <span class="filter" data-filter="completed">
-          Completed
-        </span>
+        <span class="filter active" data-filter="all"> All </span>
+        <span class="filter" data-filter="active"> Active </span>
+        <span class="filter" data-filter="completed"> Completed </span>
       </div>
 
-      <div class="todos container">
-        <ul id="todos-list">
-        </ul>
-
+      <div class="todos-container">
+        <ul id="todos-list"></ul>
         <div class="empty-state hidden">
-          <i class="fas fa-clipboard-list"></i
-          <p>There are currently no tasks. </p>
+          <i class="fas fa-clipboard-list"></i>
+          <p id="empty-task-message"></p>
         </div>
       </div>
 
       <footer>
-        <p id-"items-left">0 tasks left</p>
-        <button id="clear-completed">Clear completed tasks</button>
+        <p id="items-left"></p>
+        <button id="button-clear-completed">Clear completed tasks</button>
       </footer>
     </div>
 

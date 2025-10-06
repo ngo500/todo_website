@@ -7,6 +7,7 @@ const clearCompletedBtn = document.getElementById("button-clear-completed");
 const emptyState = document.querySelector(".empty-state");
 const dateElement = document.getElementById("date");
 const filters = document.querySelectorAll(".filter");
+const emptyMsg = document.getElementById("empty-task-message");
 
 //array to hold todo items for to-do list
 let todos = [];
@@ -20,7 +21,7 @@ addTaskBtn.addEventListener("click", () => {
 
 //check for Enter button being pressed to add task
 taskInput.addEventListener("keydown", (e) => {
-  if(e.key == "Enter") addTodo(taskInput.value);
+  if (e.key === "Enter") addTodo(taskInput.value);
 });
 
 //check for Clear Completed button being pressed to call clearCompleted function
@@ -29,7 +30,7 @@ clearCompletedBtn.addEventListener("click", clearCompleted);
 //add text from user input to to-do list
 function addTodo(text){
   //if the input is empty, don't add to the list
-  if(text.trim() == "") return;
+  if(text.trim() === "") return;
 
   //otherwise, add the input to the list
 
@@ -65,7 +66,7 @@ function updateItemsCount(){
   //save amount of tasks that are not complete
   const uncompletedTodos = todos.filter((todo) => !todo.completed);
   //update the text that displays how many tasks are left to complete
-  itemsLeft.textContent = `${uncompletedTodos?.length} item${
+  itemsLeft.textContent = `${uncompletedTodos?.length} active item${
     uncompletedTodos?.length !== 1 ? "s" : ""
   } left`;
 }
@@ -74,23 +75,32 @@ function updateItemsCount(){
 function checkEmptyState(){
   //check if there are any active tasks
   const filteredTodos = filterTodos(currentFilter);
+  //update message
+  if(currentFilter === "all"){
+    emptyMsg.textContent = `There are currently no tasks.`;
+  } else {
+    emptyMsg.textContent = `There are currently no ${currentFilter} tasks.`;
+  }
+
   //if there are no tasks, show empty list
-  if(filteredTodos?.length === 0) emptyState.classList.remove("hidden");
-  //else, show the tasks
-  else emptyState.classList.add("hidden");
+  if (filteredTodos?.length === 0){
+    emptyState.classList.remove("hidden");
+  } else{
+    emptyState.classList.add("hidden");
+  }
 }
 
 //return the state of the given todo
-function filterTodos(filter){
-  switch(filter){
+function filterTodos(filter) {
+  switch (filter) {
     //if there are active todo tasks
     case "active":
-      //return not complete
-      return todos.filter((todos) => !todo.completed);
+      //return not completed
+      return todos.filter((todo) => !todo.completed);
     //if the todo tasks are complete
     case "completed":
-      //return complete
-      return todos.filter((todos) => todo.completed);
+      //return completed
+      return todos.filter((todo) => todo.completed);
     //else,
     default:
       //return unfiltered todo
@@ -99,9 +109,9 @@ function filterTodos(filter){
 }
 
 //show todo list
-function renderTodos(){
+function renderTodos() {
   //clear UI
-  todosList.innerHTML= "";
+  todosList.innerHTML = "";
 
   //save the current filter state
   const filteredTodos = filterTodos(currentFilter);
@@ -157,6 +167,20 @@ function renderTodos(){
     //add whole item to todo list
     todosList.appendChild(todoItem);
   });
+
+  //check if the any of the current filter tasks are displayed
+  checkEmptyState();
+}
+
+//clearCompleted function called when Clear Completed button is pressed
+//removes any tasks that are marked completed
+function clearCompleted(){
+  //save only the todos that are active
+  todos = todos.filter(todo => !todo.completed);
+  //save todo without completed todos to local storage
+  saveTodos();
+  //render updated list
+  renderTodos();
 }
 
 //toggle between active/completed
@@ -164,10 +188,11 @@ function toggleTodo(id){
   //get all todos, and
   todos = todos.map((todo) => {
     //if this todo id matches
-    if(todo.id === id){
+    if (todo.id === id) {
       //update the completed field
       return { ...todo, completed: !todo.completed };
     }
+
     //else, return as is
     return todo;
   });
@@ -181,28 +206,71 @@ function toggleTodo(id){
 //delete selected todo list task
 function deleteTodo(id){
   //delete the todo selected
-  todos = todos.filter(todo => todo.id !== id)
+  todos = todos.filter((todo) => todo.id !== id);
   //save todo list without the deleted todo
   saveTodos();
   //render updated list
   renderTodos();
 }
 
-//clearCompleted function called when Clear Completed button is pressed
-//removes any tasks that are marked completed
-function clearCompleted() {}
-
 //return the stored todos from local storage
-function loadTodos() {
+function loadTodos(){
   //get todo from local storage
   const storedTodos = localStorage.getItem("todos");
   //if there are todo in local storage, store them
   if(storedTodos) todos = JSON.parse(storedTodos);
+  //check if empty
+  checkEmptyState();
   //render them
   renderTodos();
 }
 
+filters.forEach((filter) => {
+  //set listener for each filter,  if clicked then
+  filter.addEventListener("click", () => {
+    //set the clicked filter as active
+    setActiveFilter(filter.getAttribute("data-filter"));
+  });
+});
+
+//set the active filter given the filter that was clicked
+function setActiveFilter(filter){
+  //set the current filter as the one received
+  currentFilter = filter;
+
+  //for each filter,
+  filters.forEach((item) => {
+    //check if the filter matched the clicked on
+    if (item.getAttribute("data-filter") === filter) {
+      //and set as active
+      item.classList.add("active");
+    } else {
+      //else, remove from active
+      item.classList.remove("active");
+    }
+  });
+
+  //update display of which filter was clicked
+  renderTodos();
+}
+
+//set today's date for display
+function setDate(){
+  //set format of date to display
+  const options = {weekday:"long", month:"long", day:"numeric", year:"numeric"};
+  //save today's date
+  const today = new Date();
+
+  //set today's date
+  dateElement.textContent = today.toLocaleDateString("en-US", options);
+}
+
 //check for local storage todos as soon as DOM loads
 window.addEventListener("DOMContentLoaded", () => {
+  //check if there are any todo, and render
   loadTodos();
+  //update display of tasks left
+  updateItemsCount();
+  //add date to display
+  setDate();
 });
